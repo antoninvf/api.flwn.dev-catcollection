@@ -51,6 +51,14 @@ public class CatController : ControllerBase
         return files[random.Next(files.Count)];
     }
     
+    [HttpGet("visitrandom")]
+    public ActionResult GetVisitRandom()
+    {
+        var files = getFiles();
+        var random = new Random();
+        return Redirect(files[random.Next(files.Count)].Link);
+    }
+    
     [HttpGet("cats/{category}")]
     public ActionResult<IEnumerable<CatFile>> GetVersions(string category)
     {
