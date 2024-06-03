@@ -30,7 +30,7 @@ public class CatController : ControllerBase
             var file = new CatFile();
             file.FileName = Path.GetFileName(e);
             file.Category = Path.GetFileName(Path.GetDirectoryName(e)) ?? "/";
-            file.Link = $"https://cat.basil.florist/{Uri.EscapeDataString(file.Category)}/{Uri.EscapeDataString(file.FileName)}";
+            file.Link = $"https://cat.basil.florist/browse/{Uri.EscapeDataString(file.Category)}/{Uri.EscapeDataString(file.FileName)}";
             fileList.Add(file);
         }
         
