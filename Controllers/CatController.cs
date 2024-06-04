@@ -15,7 +15,7 @@ public class CatController : ControllerBase
     {
         _logger = logger;
     }
-    
+
     private string path = "/mnt/dino/cat";
 
     private List<CatFile> getFiles()
@@ -33,7 +33,7 @@ public class CatController : ControllerBase
             file.Link = $"https://cat.basil.florist/browse/{Uri.EscapeDataString(file.Category)}/{Uri.EscapeDataString(file.FileName)}";
             fileList.Add(file);
         }
-        
+
         return fileList;
     }
 
@@ -42,30 +42,33 @@ public class CatController : ControllerBase
     {
         return getFiles();
     }
-    
+
     [HttpGet("random")]
     public ActionResult<CatFile> GetRandom()
     {
-        var files = getFiles();
+        // all files except Thumbs.db
+        var files = getFiles().Where(x => !x.FileName.Equals("Thumbs.db")).ToList();
         var random = new Random();
         return files[random.Next(files.Count)];
     }
-    
+
     [HttpGet("visitrandom")]
     public ActionResult GetVisitRandom()
     {
-        var files = getFiles();
+        // all files except Thumbs.db
+        var files = getFiles().Where(x => !x.FileName.Equals("Thumbs.db")).ToList();
         var random = new Random();
         return Redirect(files[random.Next(files.Count)].Link);
     }
-    
+
     [HttpGet("cats/{category}")]
     public ActionResult<IEnumerable<CatFile>> GetVersions(string category)
     {
         return getFiles().Where(x => Uri.EscapeDataString(x.Category.ToLower()).Equals(Uri.EscapeDataString(category.ToLower()))).ToList();
     }
 
-    [HttpGet("categories")]
+    // get it like cats short for categories
+    [HttpGet("cats")]
     public ActionResult<IEnumerable<string>> GetModpacks()
     {
         if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development") path = "Y:/cat";
@@ -74,5 +77,50 @@ public class CatController : ControllerBase
         var folders = Directory.GetDirectories(path).Select(Path.GetFileName).ToList();
 
         return folders!;
+    }
+
+    // stats endpoints
+    [HttpGet("stats")]
+    public ActionResult<Stats> GetStats()
+    {
+        var files = getFiles();
+        var stats = new Stats();
+        stats.FileCount = files.Count;
+
+        // Image extensions
+        stats.ImageCount = files.Count(x => x.FileName.EndsWith(".png"));
+        stats.ImageCount += files.Count(x => x.FileName.EndsWith(".jpg"));
+        stats.ImageCount += files.Count(x => x.FileName.EndsWith(".jpeg"));
+        stats.ImageCount += files.Count(x => x.FileName.EndsWith(".gif"));
+        stats.ImageCount += files.Count(x => x.FileName.EndsWith(".webp"));
+
+        // Video extensions
+        stats.VideoCount = files.Count(x => x.FileName.EndsWith(".mp4"));
+        stats.VideoCount += files.Count(x => x.FileName.EndsWith(".webm"));
+        stats.VideoCount += files.Count(x => x.FileName.EndsWith(".mov"));
+        stats.CategoryCount = files.Select(x => x.Category).Distinct().Count();
+        stats.Categories = files.Select(x => x.Category).Distinct().ToList();
+        return stats;
+    }
+
+    [HttpGet("stats/{category}")]
+    public ActionResult<Stats> GetStats(string category)
+    {
+        var files = getFiles().Where(x => Uri.EscapeDataString(x.Category.ToLower()).Equals(Uri.EscapeDataString(category.ToLower()))).ToList();
+        var stats = new Stats();
+        stats.FileCount = files.Count;
+
+        // Image extensions
+        stats.ImageCount = files.Count(x => x.FileName.EndsWith(".png"));
+        stats.ImageCount += files.Count(x => x.FileName.EndsWith(".jpg"));
+        stats.ImageCount += files.Count(x => x.FileName.EndsWith(".jpeg"));
+        stats.ImageCount += files.Count(x => x.FileName.EndsWith(".gif"));
+        stats.ImageCount += files.Count(x => x.FileName.EndsWith(".webp"));
+
+        // Video extensions
+        stats.VideoCount = files.Count(x => x.FileName.EndsWith(".mp4"));
+        stats.VideoCount += files.Count(x => x.FileName.EndsWith(".webm"));
+        stats.VideoCount += files.Count(x => x.FileName.EndsWith(".mov"));
+        return stats;
     }
 }
