@@ -1,3 +1,3 @@
-# GeronimoUpdaterAPI
+# Cat Collection API
 
-API for listing versions and modpacks on https://api.gangnamstyle.dev/geronimo
+API for listing what files are on https://cat.basil.florist/browse while allowing random choice of a file from the collection and showing stats
