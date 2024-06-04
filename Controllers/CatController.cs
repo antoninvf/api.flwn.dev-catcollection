@@ -48,8 +48,25 @@ public class CatController : ControllerBase
     {
         // all files except Thumbs.db
         var files = getFiles().Where(x => !x.FileName.Equals("Thumbs.db")).ToList();
+        var categoryCount = files.Select(x => x.Category).Distinct().Count();
         var random = new Random();
-        return files[random.Next(files.Count)];
+
+        while (true)
+        {
+            var randomFile = files[random.Next(files.Count)];
+
+            if (randomFile.Category == ".secret")
+            {
+                if (random.Next(0, categoryCount) == 0)
+                {
+                    return randomFile;
+                }
+            }
+            else
+            {
+                return randomFile;
+            }
+        }
     }
 
     [HttpGet("visitrandom")]
@@ -57,8 +74,25 @@ public class CatController : ControllerBase
     {
         // all files except Thumbs.db
         var files = getFiles().Where(x => !x.FileName.Equals("Thumbs.db")).ToList();
+        var categoryCount = files.Select(x => x.Category).Distinct().Count();
         var random = new Random();
-        return Redirect(files[random.Next(files.Count)].Link);
+
+        while (true)
+        {
+            var randomFile = files[random.Next(files.Count)];
+
+            if (randomFile.Category == ".secret")
+            {
+                if (random.Next(0, categoryCount) == 0)
+                {
+                    return Redirect(randomFile.Link);
+                }
+            }
+            else
+            {
+                return Redirect(randomFile.Link);
+            }
+        }
     }
 
     [HttpGet("cats/{category}")]
