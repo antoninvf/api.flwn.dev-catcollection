@@ -23,14 +23,19 @@ public class CatController : ControllerBase
         if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development") path = "Y:/cat";
 
         // recursively get all files in the directory and subdirectories
-        var files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+        var files = Directory.GetFiles(path, "*", SearchOption.AllDirectories)
+            .Where(f => !f.Contains(Path.DirectorySeparatorChar + ".hist" + Path.DirectorySeparatorChar) &&
+                        !f.Contains(Path.DirectorySeparatorChar + ".hist" + Path.AltDirectorySeparatorChar))
+            .ToArray();
         var fileList = new List<CatFile>();
+        
         foreach (var e in files)
         {
             var file = new CatFile();
             file.FileName = Path.GetFileName(e);
             file.Category = Path.GetFileName(Path.GetDirectoryName(e)) ?? "/";
-            file.Link = $"https://cat.basil.florist/browse/{Uri.EscapeDataString(file.Category)}/{Uri.EscapeDataString(file.FileName)}";
+            file.Link =
+                $"https://cat.basil.florist/browse/{Uri.EscapeDataString(file.Category)}/{Uri.EscapeDataString(file.FileName)}";
             fileList.Add(file);
         }
 
@@ -98,7 +103,8 @@ public class CatController : ControllerBase
     [HttpGet("cats/{category}")]
     public ActionResult<IEnumerable<CatFile>> GetVersions(string category)
     {
-        return getFiles().Where(x => Uri.EscapeDataString(x.Category.ToLower()).Equals(Uri.EscapeDataString(category.ToLower()))).ToList();
+        return getFiles().Where(x =>
+            Uri.EscapeDataString(x.Category.ToLower()).Equals(Uri.EscapeDataString(category.ToLower()))).ToList();
     }
 
     // get it like cats short for categories
@@ -140,7 +146,8 @@ public class CatController : ControllerBase
     [HttpGet("stats/{category}")]
     public ActionResult<Stats> GetStats(string category)
     {
-        var files = getFiles().Where(x => Uri.EscapeDataString(x.Category.ToLower()).Equals(Uri.EscapeDataString(category.ToLower()))).ToList();
+        var files = getFiles().Where(x =>
+            Uri.EscapeDataString(x.Category.ToLower()).Equals(Uri.EscapeDataString(category.ToLower()))).ToList();
         var stats = new Stats();
         stats.FileCount = files.Count;
 
